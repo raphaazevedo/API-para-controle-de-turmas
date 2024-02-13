@@ -1,4 +1,4 @@
-package br.com.rapha.factories;
+	package br.com.rapha.factories;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -6,7 +6,7 @@ import java.sql.DriverManager;
 public class ConnectionFactory {
 
 	private static String driver = "org.postgresql.Driver";
-	private static String url = "jdbc:postgresql://localhost:5432/bd_apiClientes";
+	private static String url = "jdbc:postgresql://localhost:5432/bd_apiControleTurmas";
 	private static String user = "postgres";
 	private static String password = "coti";
 	
