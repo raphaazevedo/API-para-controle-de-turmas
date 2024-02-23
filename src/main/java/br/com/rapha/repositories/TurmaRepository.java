@@ -68,7 +68,10 @@ public class TurmaRepository {
 		Connection connection = ConnectionFactory.getConnection();
 		
 		PreparedStatement statement = connection.prepareStatement
-				("SELECT * FROM turma ORDER BY nome_turma");
+				("select c.id_turma, c.nome_turma, c.data_inicio, c.data_fim, p.id_professor as professor_id, "
+						+ " p.nome as nome_professor "
+						+ " from turma c inner join professor p on p.id_professor = c.professor_id "
+						+ " order by c.nome_turma");
 		
 		ResultSet resultSet = statement.executeQuery();
 		
@@ -84,6 +87,7 @@ public class TurmaRepository {
 			turma.setData_inicio(new SimpleDateFormat("yyyy-MM-dd").parse(resultSet.getString("data_inicio")));
 			turma.setData_termino(new SimpleDateFormat("yyyy-MM-dd").parse(resultSet.getString("data_fim")));
 			turma.getProfessor().setId_professor(UUID.fromString(resultSet.getString("professor_id")));
+			turma.getProfessor().setNome(resultSet.getString("nome_professor"));
 			
 			turmas.add(turma);
 		}
@@ -97,7 +101,10 @@ public class TurmaRepository {
 		
 		Connection connection = ConnectionFactory.getConnection();
 		PreparedStatement statement = connection.prepareStatement
-				("SELECT * FROM turma WHERE id_turma=?");
+				("select c.id_turma, c.nome_turma, c.data_inicio as data_inicio, c.data_fim as data_fim, p.id_professor as professor_id, "
+						+ " p.nome as nome_professor "
+						+ " from turma c inner join professor p on p.id_professor = c.professor_id "
+						+ " where c.id_turma = ?");
 		statement.setObject(1, id);
 		
 		ResultSet resultSet = statement.executeQuery();
@@ -114,6 +121,7 @@ public class TurmaRepository {
 			turma.setData_inicio(new SimpleDateFormat("yyyy-MM-dd").parse(resultSet.getString("data_inicio")));
 			turma.setData_termino(new SimpleDateFormat("yyyy-MM-dd").parse(resultSet.getString("data_fim")));
 			turma.getProfessor().setId_professor(UUID.fromString(resultSet.getString("professor_id")));
+			turma.getProfessor().setNome(resultSet.getString("nome_professor"));
 			
 			
 		}
