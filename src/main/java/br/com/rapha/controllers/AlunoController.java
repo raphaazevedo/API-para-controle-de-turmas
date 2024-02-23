@@ -3,6 +3,7 @@ package br.com.rapha.controllers;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +17,7 @@ import br.com.rapha.dtos.AlunoPostRequestDto;
 import br.com.rapha.dtos.AlunoPutRequestDto;
 import br.com.rapha.entities.Aluno;
 import br.com.rapha.repositories.AlunoRepository;
+import jakarta.validation.Valid;
 
 
 @RestController
@@ -23,27 +25,47 @@ import br.com.rapha.repositories.AlunoRepository;
 public class AlunoController {
 
 	@GetMapping
-	public List<Aluno> getAll()throws Exception{
+	public ResponseEntity<List<Aluno>> getAll()throws Exception{
 		
-		AlunoRepository alunoRepository = new AlunoRepository();
+		try {
+			AlunoRepository alunoRepository = new AlunoRepository();
+						
+			List<Aluno> alunos = alunoRepository.findAllAluno();	
+			
+			if (alunos.size() == 0) {
+				
+				return ResponseEntity.status(204).body(null);	
+				
+			}
+			
+			return ResponseEntity.status(201).body(alunos);
+			
+		}catch (Exception e) {
+			return ResponseEntity.status(500).body(null);
+		}
 		
-		return alunoRepository.findAllAluno();
+		
 		
 	}
 	
 	@GetMapping("{id}")
-	public Aluno getById(@PathVariable("id") UUID id)throws Exception {
+	public ResponseEntity<Aluno> getById(@PathVariable("id") UUID id)throws Exception {
+		
+		try {
+			AlunoRepository alunoRepository = new AlunoRepository();
+			
+			Aluno aluno = alunoRepository.findByIdAluno(id);
+			return ResponseEntity.status(201).body(aluno);
+		}catch (Exception e) {
+			return ResponseEntity.status(500).body(null);
+		}
 		
 		
-		
-		AlunoRepository alunoRepository = new AlunoRepository();
-		
-		return alunoRepository.findByIdAluno(id);
 		
 		
 	}
 	@PostMapping
-	public String post(@RequestBody AlunoPostRequestDto dto) {
+	public ResponseEntity<String> post(@RequestBody @Valid AlunoPostRequestDto dto) {
 		
 		try {
 			
@@ -57,16 +79,16 @@ public class AlunoController {
 			AlunoRepository alunoRepository = new AlunoRepository();
 			alunoRepository.insertAluno(aluno);
 			
-			return "Aluno cadastrado com sucesso!";
+			return ResponseEntity.status(201).body("Aluno cadastrado com sucesso!");
 			
 			
 		} catch (Exception e) {
 
-			return e.getMessage();
+			return ResponseEntity.status(500).body(e.getMessage());
 		}
 	}
 	@PutMapping
-	public String put(@RequestBody AlunoPutRequestDto dto) {
+	public ResponseEntity<String> put(@RequestBody @Valid AlunoPutRequestDto dto) {
 		
 		try {
 			AlunoRepository alunoRepository = new AlunoRepository();
@@ -74,7 +96,8 @@ public class AlunoController {
 			Aluno aluno = alunoRepository.findByIdAluno(dto.getId_aluno());
 			
 			if (aluno == null) {
-				throw new Exception ("Id do aluno não encontrado!");
+				return ResponseEntity.status(400).body("Id do aluno não encontrado!");
+				
 			}
 			
 			aluno.setNome(dto.getNome());
@@ -82,17 +105,17 @@ public class AlunoController {
 			aluno.setMatricula(dto.getMatricula());
 			alunoRepository.updateAluno(aluno);
 			
-			return "aluno atualizado com sucesso!";
+			return ResponseEntity.status(201).body("aluno atualizado com sucesso!");
 			
 			
 		} catch (Exception e) {
-			return e.getMessage();
+			return ResponseEntity.status(500).body(e.getMessage());
 		}
 		
 		
 	}
 	@DeleteMapping("{id}")
-	public String delete(@PathVariable("id") UUID id) {
+	public ResponseEntity<String> delete(@PathVariable("id") UUID id) {
 		
 		try {
 			
@@ -106,11 +129,12 @@ public class AlunoController {
 			
 			alunoRepository.deleteAluno(aluno);
 			
-			return "Aluno excluido com sucesso!";
+			return ResponseEntity.status(201).body("Aluno excluido com sucesso!");
+			
 			
 			
 		} catch (Exception e) {
-			return e.getMessage();
+			return ResponseEntity.status(500).body(e.getMessage());
 		}
 		
 		

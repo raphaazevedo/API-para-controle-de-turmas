@@ -3,6 +3,7 @@ package br.com.rapha.controllers;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,17 +17,30 @@ import br.com.rapha.dtos.ProfessorPostRequestDto;
 import br.com.rapha.dtos.ProfessorPutRequestDto;
 import br.com.rapha.entities.Professor;
 import br.com.rapha.repositories.ProfessorRepository;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping(value = "/api/professores")
 public class ProfessorController {
 	
 	@GetMapping
-	public List<Professor> getAll()throws Exception{
+	public ResponseEntity<List<Professor>> getAll()throws Exception{
 		
-		ProfessorRepository professorRepository = new ProfessorRepository();
-				
-		return professorRepository.findAllProfessor();
+		try {
+			ProfessorRepository professorRepository = new ProfessorRepository();
+			
+			List<Professor> professores = professorRepository.findAllProfessor();
+			
+			if(professores.size() == 0) {
+				return ResponseEntity.status(204).body(null);
+			}
+			
+			return ResponseEntity.status(201).body(professores);
+			
+		} catch (Exception e) {
+			return ResponseEntity.status(500).body(null);
+		}
+		
 	}
 	
 	@GetMapping("{id}")
@@ -37,7 +51,7 @@ public class ProfessorController {
 	}
 	
 	@PostMapping
-	public String post(@RequestBody ProfessorPostRequestDto dto)throws Exception {
+	public ResponseEntity<String> post(@RequestBody @Valid ProfessorPostRequestDto dto)throws Exception {
 		
 		try {
 			Professor professor = new Professor();
@@ -50,16 +64,16 @@ public class ProfessorController {
 			ProfessorRepository professorRepository = new ProfessorRepository();	
 			professorRepository.insertProfessor(professor);
 			
-			return "Professor incluido com sucesso!";
+			return ResponseEntity.status(201).body("Professor incluido com sucesso!");
 			
 			
 		} catch (Exception e) {
-			return e.getMessage();
+			return ResponseEntity.status(201).body(e.getMessage());
 		}
 		
 	}
 	@PutMapping
-	public String put(@RequestBody ProfessorPutRequestDto dto)throws Exception{
+	public ResponseEntity<String> put(@RequestBody @Valid ProfessorPutRequestDto dto)throws Exception{
 		
 		try {
 			ProfessorRepository professorRepository = new ProfessorRepository();
@@ -68,7 +82,8 @@ public class ProfessorController {
 			
 			if (professor == null) {
 			
-				throw new Exception("Professor não encontrado!");
+				return ResponseEntity.status(204).body("Professor não encontrado!");
+				
 			}
 			
 			professor.setNome(dto.getNome());
@@ -77,15 +92,15 @@ public class ProfessorController {
 			professorRepository.updateProfessor(professor);
 			
 			
-			return "Professor atualizado com sucesso!";
+			return ResponseEntity.status(201).body("Professor atualizado com sucesso!");
 						
 		} catch (Exception e) {
-			return e.getMessage();
+			return ResponseEntity.status(500).body(e.getMessage());
 		}
 		
 	}
 	@DeleteMapping("{id}")
-	public String delete(@PathVariable("id") UUID id)throws Exception {
+	public ResponseEntity<String> delete(@PathVariable("id") UUID id)throws Exception {
 		
 		try {
 			ProfessorRepository professorRepository = new ProfessorRepository();
@@ -93,16 +108,17 @@ public class ProfessorController {
 			
 			if(professor == null) {
 				
-				throw new Exception("Professor não encontrado!");
+				return ResponseEntity.status(204).body("Professor não encontrado!");
+				
 
 			}
 			
 			professorRepository.deleteProfessor(professor);
 			
-			return "Professor excluido com sucesso!";
+			return ResponseEntity.status(201).body("Professor excluido com sucesso!");
 			
 		} catch (Exception e) {
-			return e.getMessage();
+			return ResponseEntity.status(500).body(e.getMessage());
 		}
 		
 	}

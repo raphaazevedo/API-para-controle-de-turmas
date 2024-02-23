@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,7 +26,7 @@ import br.com.rapha.repositories.TurmaRepository;
 public class MatriculaController {
 
 	@PostMapping
-	public String post(@RequestBody MatriculaPostRequestDto dto) throws Exception {
+	public ResponseEntity<String> post(@RequestBody MatriculaPostRequestDto dto) throws Exception {
 
 		try {
 
@@ -37,14 +38,14 @@ public class MatriculaController {
 			Turma turma = turmaRepository.findByIdTurma(dto.getId_turma());
 
 			if (turma == null) {
-				throw new Exception("Turma não encontrada!");
+				return ResponseEntity.status(204).body("Turma não encontrada!");
 			}
 
 			AlunoRepository alunoRepository = new AlunoRepository();
 			Aluno aluno = alunoRepository.findByIdAluno(dto.getId_aluno());
 
 			if (aluno == null) {
-				throw new Exception("Aluno não encontrado!");
+				return ResponseEntity.status(204).body("Aluno não encontrado!");
 			}
 
 			matricula.setTurma(turma);
@@ -55,17 +56,17 @@ public class MatriculaController {
 
 			matriculaRepository.insertMaticula(matricula);
 
-			return "Matricula criada com sucesso!";
+			return ResponseEntity.status(201).body("Matricula criada com sucesso!");
 
 		} catch (Exception e) {
 
-			return e.getMessage();
+			return ResponseEntity.status(500).body(e.getMessage());
 		}
 
 	}
 
 	@DeleteMapping("{id}")
-	public String delete(@PathVariable("id") UUID id) throws Exception {
+	public ResponseEntity<String> delete(@PathVariable("id") UUID id) throws Exception {
 
 		try {
 			MatriculaRepository matriculaRepository = new MatriculaRepository();
@@ -74,33 +75,52 @@ public class MatriculaController {
 
 			if (matricula == null) {
 
-				return "Matricula não encontrada!";
+				return ResponseEntity.status(204).body("Matricula não encontrada!");
 			}
 
 			matriculaRepository.deleteMatricula(matricula);
 
-			return "Matricula excluida com sucesso!";
+			return ResponseEntity.status(201).body("Matricula excluida com sucesso!");
 		} catch (Exception e) {
-			return e.getMessage();
+			return ResponseEntity.status(500).body(e.getMessage());
 		}
 
 	}
 
 	@GetMapping
-	public List<Matricula> getAll() throws Exception {
+	public ResponseEntity<List<Matricula>> getAll() throws Exception {
 
-		MatriculaRepository matriculaRepository = new MatriculaRepository();
-
-		return matriculaRepository.findAllMatricula();
+		try {
+			MatriculaRepository matriculaRepository = new MatriculaRepository();
+			
+			List<Matricula> matriculas = matriculaRepository.findAllMatricula();
+			
+			if(matriculas.size() == 0) {
+				return ResponseEntity.status(204).body(null);
+			}
+			
+			
+			return ResponseEntity.status(null).body(matriculas);
+		}catch (Exception e) {
+			return ResponseEntity.status(500).body(null);
+		}
+		
 
 	}
 
 	@GetMapping("{id}")
-	public Matricula getById(@PathVariable("id") UUID id) throws Exception{
+	public ResponseEntity<Matricula> getById(@PathVariable("id") UUID id) throws Exception{
 		
-		MatriculaRepository  matriculaRepository = new MatriculaRepository();
-		
-		return matriculaRepository.findByIdMatricula(id);
+		try {
+			MatriculaRepository  matriculaRepository = new MatriculaRepository();
+			
+			Matricula matricula = matriculaRepository.findByIdMatricula(id);
+			
+			return ResponseEntity.status(201).body(matricula);
+				
+		}catch (Exception e) {
+			return ResponseEntity.status(201).body(null);
+		}
 		
 	}
 

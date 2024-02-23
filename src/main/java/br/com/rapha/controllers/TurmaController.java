@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,28 +20,54 @@ import br.com.rapha.entities.Professor;
 import br.com.rapha.entities.Turma;
 import br.com.rapha.repositories.ProfessorRepository;
 import br.com.rapha.repositories.TurmaRepository;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping(value = "/api/turmas")
 public class TurmaController {
 	@GetMapping
-	public List<Turma> getAll() throws Exception {
-		TurmaRepository turmaRepository = new TurmaRepository();
-
-		return turmaRepository.findAllTurma();
+	public ResponseEntity<List<Turma>> getAll() throws Exception {
+		
+		try {
+			TurmaRepository turmaRepository = new TurmaRepository();
+			
+			List<Turma> turmas = turmaRepository.findAllTurma();
+			
+			if (turmas.size() == 0) {
+				return ResponseEntity.status(204).body(null);
+			}
+			
+			return ResponseEntity.status(201).body(turmas);
+			
+		}catch (Exception e) {
+			return ResponseEntity.status(500).body(null);
+		}
+		
+		
 	}
 
 	@GetMapping("{id}")
-	public Turma getById(@PathVariable("id") UUID id) throws Exception {
+	public ResponseEntity<Turma> getById(@PathVariable("id") UUID id) throws Exception {
 
-		TurmaRepository turmaRepository = new TurmaRepository();
+		try {
+			TurmaRepository turmaRepository = new TurmaRepository();
 
-		return turmaRepository.findByIdTurma(id);
-
+			Turma turma = turmaRepository.findByIdTurma(id);
+			
+			if (turma == null) {
+				return ResponseEntity.status(204).body(null);
+			}
+			
+			return ResponseEntity.status(201).body(turma);
+	
+		}catch (Exception e) {
+			return ResponseEntity.status(201).body(null);
+		}
+		
 	}
 
 	@PostMapping
-	public String post(@RequestBody TurmaPostRequestDto dto) throws Exception {
+	public ResponseEntity<String> post(@RequestBody @Valid TurmaPostRequestDto dto) throws Exception {
 		
 		try {
 			
@@ -55,7 +82,8 @@ public class TurmaController {
 			Professor professor = professorRepository.findByIdProfessor(dto.getProfessor_id());
 			
 			if (professor == null) {
-				throw new Exception("Professor não encpontrado");
+				return ResponseEntity.status(204).body("Professor não encpontrado");
+				
 			}
 			
 			turma.setProfessor(professor);
@@ -64,19 +92,19 @@ public class TurmaController {
 			
 			turmaRepository.insertTurma(turma);
 			
-			return "Turma cadastrada com sucesso!";
+			return ResponseEntity.status(201).body("Turma cadastrada com sucesso!");
 
 			
 			
 			
 		} catch (Exception e) {
-			return e.getMessage();
+			return ResponseEntity.status(500).body(e.getMessage());
 		}
 		
 	}
 
 	@PutMapping
-	public String put(@RequestBody TurmaPutRequestDot dto) throws Exception {
+	public ResponseEntity<String> put(@RequestBody @Valid TurmaPutRequestDot dto) throws Exception {
 		
 		try {
 			
@@ -85,7 +113,8 @@ public class TurmaController {
 			Turma turma = turmaRepository.findByIdTurma(dto.getTurma_id());
 			
 			if (turma == null) {
-				throw new Exception("Id da turma não encontrado!");
+				return ResponseEntity.status(204).body("Id da turma não encontrado!");
+				
 			}
 			
 			ProfessorRepository professorRepository =new ProfessorRepository();
@@ -93,7 +122,7 @@ public class TurmaController {
 			Professor professor = professorRepository.findByIdProfessor(dto.getProfessor_id());
 			
 			if(professor == null) {
-				throw new Exception("Professor não encontrado!");
+				return ResponseEntity.status(204).body("Professor não encontrado!");
 			}
 			
 			
@@ -108,12 +137,12 @@ public class TurmaController {
 			
 			turmaRepository.updateTurma(turma);
 			
-			return "Turma atualizada com sucesso!";
+			return ResponseEntity.status(201).body("Turma atualizada com sucesso!");
 
 			
 			
 		} catch (Exception e) {
-			return e.getMessage();
+			return ResponseEntity.status(204).body(e.getMessage());
 		}
 		
 		
@@ -121,7 +150,7 @@ public class TurmaController {
 	}
 
 	@DeleteMapping("{id}")
-	public String delete(@PathVariable("id") UUID id) throws Exception {
+	public ResponseEntity<String> delete(@PathVariable("id") UUID id) throws Exception {
 		
 		try {
 			
@@ -130,17 +159,18 @@ public class TurmaController {
 			Turma turma = turmaRepository.findByIdTurma(id);
 			
 			if (turma == null) {
-				throw new Exception ("Turma não encontrada");
+				return ResponseEntity.status(204).body("Turma não encontrada");
+				
 				
 			}
 			
 			turmaRepository.deleteTurma(turma);
 			
-			return "Turma deletada com sucesso!";
+			return ResponseEntity.status(201).body("Turma deletada com sucesso!");
 			
 			
 		} catch (Exception e) {
-			return e.getMessage();
+			return ResponseEntity.status(500).body(e.getMessage());
 		}
 		
 		
